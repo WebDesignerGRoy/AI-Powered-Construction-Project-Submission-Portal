@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NovaBuild AI — Custom Construction with Intelligent Pre‑Planning</title>
+  <meta name="description" content="NovaBuild AI helps you plan, estimate, and collaborate on custom construction projects using AI-powered renderings, cost estimates, and automated proposals." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #0f172a;
+      --muted: #94a3b8;
+      --text: #e5e7eb;
+      --accent: #22d3ee; /* cyan */
+      --accent-2: #f59e0b; /* orange */
+      --success: #22c55e;
+      --danger: #ef4444;
+      --steel: #1f2937;
+      --steel-2: #111827;
+      --ring: rgba(34, 211, 238, 0.45);
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --glass: rgba(255,255,255,0.06);
+      --gradient: radial-gradient(1200px 600px at 10% -20%, rgba(34,211,238,0.25), transparent 60%), radial-gradient(1000px 500px at 90% 0%, rgba(245,158,11,0.20), transparent 60%), radial-gradient(800px 400px at 50% 100%, rgba(99,102,241,0.15), transparent 60%);
+    }
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      scroll-behavior: smooth;
+    }
+    .container-max {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    .backdrop-grid {
+      background-image: linear-gradient(to bottom right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to top right, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 24px 24px;
+      mask-image: radial-gradient(600px 300px at 50% 0%, black, transparent 70%);
+    }
+    .glass {
+      background: var(--glass);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .75rem 1.1rem;
+      border-radius: .75rem;
+      font-weight: 600;
+      transition: all .2s ease;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #3b82f6);
+      color: #0b1020;
+      box-shadow: 0 10px 20px rgba(34,211,238,0.25);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 14px 28px rgba(34,211,238,0.35); }
+    .btn-outline {
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--text);
+      background: rgba(255,255,255,0.02);
+    }
+    .btn-outline:hover { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.06); }
+    .tag {
+      display: inline-flex; align-items: center; gap: .35rem;
+      padding: .25rem .6rem; border-radius: 999px;
+      background: rgba(34,211,238,0.12); color: var(--accent);
+      border: 1px solid rgba(34,211,238,0.25);
+      font-size: .75rem; font-weight: 600;
+    }
+    .field {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: .75rem;
+      padding: .75rem .9rem;
+      color: var(--text);
+      transition: border .2s ease, box-shadow .2s ease;
+    }
+    .field:focus {
+      outline: none;
+      border-color: var(--ring);
+      box-shadow: 0 0 0 4px rgba(34,211,238,0.15);
+    }
+    .label {
+      font-size: .9rem;
+      color: var(--muted);
+      margin-bottom: .4rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .step-indicator {
+      display: grid;
+      grid-auto-flow: column;
+      gap: .5rem;
+      align-items: center;
+    }
+    .dot {
+      width: 14px; height: 14px; border-radius: 999px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.15);
+      transition: all .2s ease;
+    }
+    .dot.active { background: linear-gradient(135deg, var(--accent), #60a5fa); border-color: transparent; }
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 1rem;
+      box-shadow: var(--shadow);
+    }
+    .shadow-soft { box-shadow: 0 20px 60px rgba(0,0,0,0.35); }
+    .gradient-text {
+      background: linear-gradient(135deg, #e0f2fe, #a78bfa, #f59e0b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .hero-bg {
+      background:
+        var(--gradient),
+        linear-gradient(180deg, rgba(255,255,255,0.05), transparent 60%);
+    }
+    .divider {
+      height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+    }
+    .pill {
+      border-radius: 999px;
+      padding: .35rem .75rem;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      font-size: .85rem;
+    }
+    .status-badge {
+      padding: .35rem .65rem;
+      border-radius: .5rem;
+      font-size: .8rem;
+      font-weight: 700;
+    }
+    .status-open { background: rgba(34,197,94,0.15); color: #34d399; border: 1px solid rgba(34,197,94,0.35); }
+    .status-review { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.35); }
+    .status-complete { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.35); }
+    .ai-chip {
+      background: linear-gradient(135deg, rgba(34,211,238,0.18), rgba(99,102,241,0.18));
+      border: 1px solid rgba(34,211,238,0.35);
+      color: #a5f3fc;
+    }
+    .floating {
+      animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+    .pulse-ring {
+      position: relative;
+    }
+    .pulse-ring::after {
+      content: ""; position: absolute; inset: -6px;
+      border-radius: .8rem; border: 2px solid rgba(34,211,238,0.3);
+      animation: pulse 2.4s ease-out infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(.95); opacity: .7; }
+      100% { transform: scale(1.15); opacity: 0; }
+    }
+    .scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
+    .scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 999px; }
+    .file-drop {
+      border: 1.5px dashed rgba(255,255,255,0.2);
+      border-radius: 1rem;
+      transition: all .2s ease;
+    }
+    .file-drop.dragover {
+      border-color: var(--accent);
+      background: rgba(34,211,238,0.08);
+    }
+    .rating {
+      color: #fbbf24;
+    }
+    .cta-blur {
+      position: absolute; inset: 0; background: radial-gradient(600px 300px at 80% -10%, rgba(245,158,11,0.25), transparent 60%); pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="absolute inset-0 hero-bg -z-10 backdrop-grid"></div>
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-[#0b1020cc] border-b border-white/10">
+    <div class="container-max flex items-center justify-between py-4">
+      <a href="#" class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-indigo-500 flex items-center justify-center text-[#0b1020] font-black">N</div>
+        <div class="leading-tight">
+          <div class="font-extrabold tracking-tight">NovaBuild AI</div>
+          <div class="text-xs text-slate-400 -mt-0.5">Smart Construction Pre‑Planning</div>
+        </div>
+      </a>
+      <nav class="hidden md:flex items-center gap-6 text-slate-300">
+        <a href="#intake" class="hover:text-white">Intake</a>
+        <a href="#ai" class="hover:text-white">AI Tools</a>
+        <a href="#dashboard" class="hover:text-white">Client Portal</a>
+        <a href="#testimonials" class="hover:text-white">Trust</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <a href="#cta" class="btn btn-outline">Contact</a>
+        <a href="#intake" class="btn btn-primary">Start Your Project</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="relative overflow-hidden">
+      <div class="cta-blur"></div>
+      <div class="container-max pt-14 pb-10 md:pt-20 md:pb-16">
+        <div class="grid md:grid-cols-2 gap-10 items-center">
+          <div>
+            <div class="tag mb-4">New • AI‑assisted Construction</div>
+            <h1 class="text-4xl md:text-6xl font-black tracking-tight leading-tight">
+              Build your dream custom construction
+              <span class="gradient-text">with intelligent pre‑planning</span>
+            </h1>
+            <p class="mt-5 text-slate-300 text-lg leading-relaxed">
+              NovaBuild AI captures your vision, generates smart renderings, creates instant cost estimates,
+              and automates proposals — all in one secure client portal.
+            </p>
+            <div class="mt-6 flex flex-wrap gap-3">
+              <a href="#intake" class="btn btn-primary">Start Your Project</a>
+              <a href="#ai" class="btn btn-outline">Get a Rendering</a>
+            </div>
+            <div class="mt-6 flex items-center gap-4 text-slate-400">
+              <div class="flex -space-x-3">
+                <img src="https://i.pravatar.cc/40?img=1" class="w-8 h-8 rounded-full border border-white/20" alt="client"/>
+                <img src="https://i.pravatar.cc/40?img=2" class="w-8 h-8 rounded-full border border-white/20" alt="client"/>
+                <img src="https://i.pravatar.cc/40?img=3" class="w-8 h-8 rounded-full border border-white/20" alt="client"/>
+              </div>
+              <div class="text-sm">Trusted by 1,200+ homeowners & commercial clients</div>
+            </div>
+          </div>
+          <div class="relative">
+            <div class="absolute -top-8 -right-6 w-40 h-40 rounded-full bg-cyan-500/20 blur-3xl"></div>
+            <div class="absolute -bottom-8 -left-8 w-52 h-52 rounded-full bg-orange-500/20 blur-3xl"></div>
+            <div class="glass rounded-2xl p-4 md:p-6 shadow-soft floating">
+              <div class="grid grid-cols-3 gap-3">
+                <div class="col-span-2 card p-4">
+                  <div class="flex items-center justify-between">
+                    <div class="text-sm text-slate-400">Project Render</div>
+                    <span class="ai-chip text-xs px-2 py-1 rounded-full">AI‑assisted</span>
+                  </div>
+                  <div class="mt-3 aspect-[4/3] rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center">
+                    <svg width="120" height="120" viewBox="0 0 120 120" class="opacity-80">
+                      <rect x="10" y="10" width="100" height="100" rx="10" fill="none" stroke="url(#g1)" stroke-width="2"/>
+                      <defs>
+                        <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stop-color="#22d3ee"/>
+                          <stop offset="100%" stop-color="#60a5fa"/>
+                        </linearGradient>
+                      </defs>
+                      <rect x="20" y="20" width="80" height="60" rx="8" fill="none" stroke="#f59e0b"/>
+                      <rect x="24" y="30" width="40" height="10" rx="2" fill="#e5e7eb"/>
+                      <rect x="70" y="20" width="32" height="60" rx="8" fill="none" stroke="#34d399"/>
+                    </svg>
+                  </div>
+                  <div class="text-xs text-slate-400 mt-2">Auto-layout facade</div>
+                </div>
+                <div class="card p-4">
+                  <div class="text-sm text-slate-400">Estimate</div>
+                  <div class="mt-2 text-2xl font-bold">$182,000</div>
+                  <div class="text-xs text-slate-400">±5% variance</div>
+                  <div class="mt-3 h-2 rounded bg-white/10">
+                    <div class="h-2 rounded bg-gradient-to-r from-cyan-400 to-emerald-400" style="width: 62%"></div>
+                  </div>
+                </div>
+                <div class="col-span-3 card p-4">
+                  <div class="flex items-center justify-between">
+                    <div class="text-sm text-slate-400">Proposal Status</div>
+                    <span class="status-badge status-open">Open</span>
+                  </div>
+                  <div class="mt-3 flex items-center gap-3 text-sm">
+                    <span class="pill">Auto summary</span>
+                    <span class="pill">Material options</span>
+                    <span class="pill">PDF export</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="absolute -bottom-6 -right-6 glass rounded-xl p-3 flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-emerald-400/20 flex items-center justify-center">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 7l-9 9-5-5" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="text-sm">
+                <div class="font-semibold">AI assistant online</div>
+                <div class="text-slate-400">Avg 2 min response</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="intake" class="container-max py-12 md:py-16">
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="md:col-span-1">
+          <h2 class="text-3xl md:text-4xl font-black tracking-tight">Smart Intake</h2>
+          <p class="mt-3 text-slate-300">Answer a few quick questions. Your progress autosaves. Conditional fields adapt to your project type.</p>
+          <div class="mt-5 p-4 card">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-cyan-400/20 flex items-center justify-center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18" stroke="#22d3ee" stroke-width="2" stroke-linecap="round"/></svg>
+              </div>
+              <div>
+                <div class="font-semibold">Auto-save</div>
+                <div class="text-xs text-slate-400">No data is lost during form edits</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="md:col-span-2">
+          <div class="glass rounded-2xl p-5">
+            <div class="flex items-center justify-between">
+              <div class="step-indicator">
+                <div class="dot active"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+              </div>
+              <div class="text-sm text-slate-400"><span id="step-counter">Step 1 of 4</span></div>
+            </div>
+            <div class="divider my-4"></div>
+
+            <form id="intake-form" class="space-y-6">
+              <div data-step="1" class="step">
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <div class="label">Full Name</div>
+                    <input type="text" class="field w-full" name="name" placeholder="Jane Doe" required />
+                  </div>
+                  <div>
+                    <div class="label">Email</div>
+                    <input type="email" class="field w-full" name="email" placeholder="jane@email.com" required />
+                  </div>
+                  <div>
+                    <div class="label">Phone</div>
+                    <input type="tel" class="field w-full" name="phone" placeholder="(555) 123-4567" required />
+                  </div>
+                  <div>
+                    <div class="label">Address</div>
+                    <input type="text" class="field w-full" name="address" placeholder="123 Main St, City, ST" required />
+                  </div>
+                </div>
+              </div>
+
+              <div data-step="2" class="step hidden">
+                <div class="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <div class="label">Project Type</div>
+                    <select class="field w-full" name="type" id="type">
+                      <option>Residential</option>
+                      <option>Custom Build</option>
+                      <option>Renovation</option>
+                      <option>Commercial</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <div class="label">Budget Range</div>
+                    <select class="field w-full" name="budget">
+                      <option>$50k - $100k</option>
+                      <option>$100k - $250k</option>
+                      <option>$250k - $500k</option>
+                      <option>$500k+</option>
+                    </select>
+                  </div>
+                  <div>
+                    <div class="label">Timeline</div>
+                    <select class="field w-full" name="timeline">
+                      <option>2-3 months</option>
+                      <option>3-6 months</option>
+                      <option>6-12 months</option>
+                      <option>12+ months</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div data-step="3" class="step hidden">
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <div class="label">Primary Goals</div>
+                    <input type="text" class="field w-full" name="goals" placeholder="Open plan, energy efficient, smart home ready..." />
+                  </div>
+                  <div>
+                    <div class="label">Preferred Material Style</div>
+                    <select class="field w-full" name="material">
+                      <option>Slate Modern</option>
+                      <option>Exterior Brick/Stone</option>
+                      <option>Timber / Green</option>
+                      <option>Industrial</option>
+                      <option>Traditional</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <div class="label">Site Notes</div>
+                  <textarea class="field w-full" name="site" rows="4" placeholder="View, zoning, utilities, accessibility..."></textarea>
+                </div>
+              </div>
+
+              <div data-step="4" class="step hidden">
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <div class="label">Upload Photos/Blueprints</div>
+                    <div id="drop" class="file-drop p-6 text-center cursor-pointer">
+                      <div class="text-slate-400">Drag & drop files here or click to select</div>
+                      <div class="text-xs text-slate-500 mt-1">PDF, JPG, PNG up to 10MB</div>
+                      <input id="file-input" type="file" class="hidden" multiple accept=".pdf,.jpg,.jpeg,.png"/>
+                    </div>
+                    <div id="file-list" class="mt-3 space-y-2"></div>
+                  </div>
+                  <div>
+                    <div class="label">Inspiration Assets</div>
+                    <input type="url" class="field w-full" name="inspiration" placeholder="Paste a link to Pinterest or Instagram board"/>
+                    <div class="mt-4">
+                      <div class="label">Reference Drawings</div>
+                      <input type="url" class="field w-full" name="drawing" placeholder="Link to CAD/SketchUp/Revit"/>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between pt-2">
+                <button type="button" id="prev" class="btn btn-outline">Back</button>
+                <div class="flex items-center gap-3">
+                  <button type="button" id="save" class="btn btn-outline">Save Progress</button>
+                  <button type="button" id="next" class="btn btn-primary">Next</button>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="mt-4 text-xs text-slate-400">By continuing, you agree to our Terms and Privacy Policy.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="ai" class="container-max py-12 md:py-16">
+      <div class="grid lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1">
+          <h2 class="text-3xl md:text-4xl font-black tracking-tight">AI Integration</h2>
+          <p class="mt-3 text-slate-300">Preview tools embedded into your experience: generate renderings, estimate costs, and draft a proposal — all with your data.</p>
+          <div class="mt-5 grid grid-cols-2 gap-3">
+            <div class="card p-4">
+              <div class="text-sm text-slate-400">AI Assistant</div>
+              <div class="font-semibold mt-1">Chat</div>
+            </div>
+            <div class="card p-4">
+              <div class="text-sm text-slate-400">Renderings</div>
+              <div class="font-semibold mt-1">3D + 2D</div>
+            </div>
+            <div class="card p-4">
+              <div class="text-sm text-slate-400">Costing</div>
+              <div class="font-semibold mt-1">Estimator</div>
+            </div>
+            <div class="card p-4">
+              <div class="text-sm text-slate-400">Proposals</div>
+              <div class="font-semibold mt-1">Auto Draft</div>
+            </div>
+          </div>
+        </div>
+        <div class="lg:col-span-2">
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="card p-5">
+              <div class="flex items-center justify-between">
+                <div class="text-sm text-slate-400">AI Rendering</div>
+                <span class="ai-chip text-xs px-2 py-1 rounded-full">Beta</span>
+              </div>
+              <div class="mt-3 aspect-video rounded-lg bg-gradient-to-tr from-slate-800 to-slate-900 flex items-center justify-center">
+                <div class="text-center">
+                  <div class="text-4xl mb-2">🏗️</div>
+                  <div class="text-slate-300">Scene preview</div>
+                </div>
+              </div>
+              <div class="mt-4 flex items-center gap-3">
+                <button id="generate-render" class="btn btn-primary">Generate Rendering</button>
+                <button id="download-render" class="btn btn-outline" disabled>Download</button>
+              </div>
+            </div>
+            <div class="card p-5">
+              <div class="flex items-center justify-between">
+                <div class="text-sm text-slate-400">AI Cost Estimate</div>
+                <span class="ai-chip text-xs px-2 py-1 rounded-full">On-device</span>
+              </div>
+              <div class="mt-3 grid grid-cols-2 gap-3">
+                <div>
+                  <div class="label">Sq. Ft.</div>
+                  <input type="number" id="sqft" class="field w-full" value="2200" min="100" />
+                </div>
+                <div>
+                  <div class="label">Rooms</div>
+                  <input type="number" id="rooms" class="field w-full" value="4" min="1" />
+                </div>
+                <div>
+                  <div class="label">Finishes</div>
+                  <select id="finishes" class="field w-full">
+                    <option>Standard</option>
+                    <option>Luxury</option>
+                    <option>Custom</option>
+                  </select>
+                </div>
+                <div>
+                  <div class="label">Project Type</div>
+                  <select id="est-type" class="field w-full">
+                    <option>Residential</option>
+                    <option>Custom Build</option>
+                    <option>Renovation</option>
+                    <option>Commercial</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mt-4">
+                <div class="text-3xl font-extrabold" id="estimate">—</div>
+                <div class="text-xs text-slate-400">Estimate generated from local logic</div>
+              </div>
+              <div class="mt-4 flex gap-3">
+                <button id="calc" class="btn btn-primary">Calculate</button>
+                <button id="add-to-proposal" class="btn btn-outline" disabled>Add to Proposal</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 card p-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm text-slate-400">AI Proposal</div>
+                <div class="font-semibold">Draft & Export</div>
+              </div>
+              <div class="flex gap-2">
+                <button id="summarize" class="btn btn-outline">Summarize Scope</button>
+                <button id="export-pdf" class="btn btn-primary">Export PDF</button>
+              </div>
+            </div>
+            <div class="mt-4 grid md:grid-cols-3 gap-4">
+              <div class="md:col-span-2">
+                <div id="summary" class="text-slate-300 text-sm leading-relaxed">
+                  Provide intake details to generate an auto‑summarized project scope, material suggestions, and timeline suggestions.
+                </div>
+              </div>
+              <div>
+                <div class="glass rounded-lg p-3">
+                  <div class="text-xs text-slate-400">Suggested Materials</div>
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    <span class="pill">Exterior Brick</span>
+                    <span class="pill">Cross‑Laminated Timber</span>
+                    <span class="pill">High‑Efficiency Windows</span>
+                    <span class="pill">Solar Panels</span>
+                  </div>
+                </div>
+                <div class="glass rounded-lg p-3 mt-3">
+                  <div class="text-xs text-slate-400">Upgrades</div>
+                  <ul class="mt-2 text-sm list-disc list-inside text-slate-300">
+                    <li>Smart lighting</li>
+                    <li>Zoning automation</li>
+                    <li>Advanced ventilation</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="dashboard" class="container-max py-12 md:py-16">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-3xl md:text-4xl font-black tracking-tight">Client Dashboard</h2>
+          <p class="text-slate-300 mt-2">Secure access to your project details, status, and documents.</p>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn btn-outline">Sign In</button>
+          <button class="btn btn-primary">Create Account</button>
+        </div>
+      </div>
+      <div class="grid lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-6">
+          <div class="card p-5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-400 to-indigo-500 flex items-center justify-center">🏠</div>
+                <div>
+                  <div class="font-semibold">Your Project</div>
+                  <div class="text-xs text-slate-400">Client ID: <span id="clientId"></span></div>
+                </div>
+              </div>
+              <span class="status-badge status-review">In Review</span>
+            </div>
+            <div class="mt-4 grid md:grid-cols-3 gap-4">
+              <div class="glass rounded-lg p-4">
+                <div class="text-xs text-slate-400">Budget</div>
+                <div class="font-bold mt-1" id="dash-budget">$—</div>
+              </div>
+              <div class="glass rounded-lg p-4">
+                <div class="text-xs text-slate-400">Timeline</div>
+                <div class="font-bold mt-1" id="dash-timeline">—</div>
+              </div>
+              <div class="glass rounded-lg p-4">
+                <div class="text-xs text-slate-400">Type</div>
+                <div class="font-bold mt-1" id="dash-type">—</div>
+              </div>
+            </div>
+            <div class="mt-4">
+              <div class="text-xs text-slate-400">Files</div>
+              <div id="dash-files" class="mt-2 flex flex-wrap gap-2"></div>
+            </div>
+          </div>
+
+          <div class="card p-5">
+            <div class="flex items-center justify-between">
+              <div class="font-semibold">Messages</div>
+              <div class="text-xs text-slate-400">Team responds within 2 hours</div>
+            </div>
+            <div class="mt-3 space-y-3 max-h-60 overflow-auto scrollbar" id="messages">
+              <div class="glass rounded-lg p-3">
+                <div class="text-xs text-slate-400">Admin</div>
+                <div class="text-sm">Thanks for submitting your project. Our AI will generate a preliminary rendering and scope summary today.</div>
+              </div>
+              <div class="glass rounded-lg p-3">
+                <div class="text-xs text-slate-400">AI Assistant</div>
+                <div class="text-sm">Morning! I’m available to answer questions and suggest materials based on your preferences.</div>
+              </div>
+            </div>
+            <div class="mt-3 flex gap-2">
+              <input id="message-input" class="field flex-1" placeholder="Type a message..." />
+              <button id="send-message" class="btn btn-primary">Send</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="card p-5">
+            <div class="font-semibold">Proposal Tasks</div>
+            <div class="mt-3 space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="text-sm">Auto scope summary</div>
+                <span class="status-badge status-open">Pending</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="text-sm">Material options</div>
+                <span class="status-badge status-open">Pending</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="text-sm">Cost breakdown</div>
+                <span class="status-badge status-review">In Review</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="text-sm">PDF export</div>
+                <span class="status-badge status-complete">Done</span>
+              </div>
+            </div>
+          </div>
+          <div class="card p-5">
+            <div class="font-semibold">Recent Activity</div>
+            <ul class="mt-3 text-sm text-slate-300 space-y-2">
+              <li>• Render generated</li>
+              <li>• Estimate calculated</li>
+              <li>• Proposal draft saved</li>
+              <li>• Team review scheduled</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="testimonials" class="container-max py-12 md:py-16">
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="card p-5">
+          <div class="flex items-center gap-3">
+            <img src="https://i.pravatar.cc/60?img=8" class="w-10 h-10 rounded-full" alt="client"/>
+            <div>
+              <div class="font-semibold">Alex P.</div>
+              <div class="text-xs text-slate-400">Custom Builders</div>
+            </div>
+          </div>
+          <p class="mt-3 text-slate-300">The AI pre‑planning brought our timelines down 2 weeks and cut costs by 8% without any compromises.</p>
+          <div class="mt-3 rating">★★★★★</div>
+        </div>
+        <div class="card p-5">
+          <div class="flex items-center gap-3">
+            <img src="https://i.pravatar.cc/60?img=10" class="w-10 h-10 rounded-full" alt="client"/>
+            <div>
+              <div class="font-semibold">Maya R.</div>
+              <div class="text-xs text-slate-400">Homeowner</div>
+            </div>
+          </div>
+          <p class="mt-3 text-slate-300">The proposal automation was perfect — professional, clear, and customized to our goals and budget.</p>
+          <div class="mt-3 rating">★★★★★</div>
+        </div>
+        <div class="card p-5">
+          <div class="flex items-center gap-3">
+            <img src="https://i.pravatar.cc/60?img=12" class="w-10 h-10 rounded-full" alt="client"/>
+            <div>
+              <div class="font-semibold">Dan K.</div>
+              <div class="text-xs text-slate-400">Eco Commercial</div>
+            </div>
+          </div>
+          <p class="mt-3 text-slate-300">We loved the collaborative feel. The client portal made updates and approvals seamless.</p>
+          <div class="mt-3 rating">★★★★★</div>
+        </div>
+      </div>
+      <div class="mt-8 grid md:grid-cols-3 gap-6">
+        <div class="card p-5">
+          <div class="text-sm text-slate-400">Certifications</div>
+          <div class="font-semibold mt-1">Built with Trust</div>
+          <div class="mt-3 flex gap-2">
+            <span class="pill">ISO 9001</span>
+            <span class="pill">LEED AP</span>
+            <span class="pill">GreenBuilding</span>
+          </div>
+        </div>
+        <div class="card p-5">
+          <div class="text-sm text-slate-400">Portfolio</div>
+          <div class="mt-3 grid grid-cols-3 gap-2">
+            <div class="aspect-square rounded-lg bg-gradient-to-br from-slate-800 to-slate-900"></div>
+            <div class="aspect-square rounded-lg bg-gradient-to-br from-slate-800 to-slate-900"></div>
+            <div class="aspect-square rounded-lg bg-gradient-to-br from-slate-800 to-slate-900"></div>
+          </div>
+        </div>
+        <div class="card p-5">
+          <div class="text-sm text-slate-400">Security & Privacy</div>
+          <div class="mt-3 flex items-center gap-2 text-emerald-300">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3l7 4v5c0 5-3.5 9-7 9s-7-4-7-9V7l7-4z" stroke="#34d399" stroke-width="2"/></svg>
+            <span class="text-sm">Encrypted uploads</span>
+          </div>
+          <div class="text-sm text-slate-300 mt-2">All files and data are securely stored.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="cta" class="container-max py-12 md:py-16">
+      <div class="glass rounded-2xl p-6 md:p-10 relative overflow-hidden">
+        <div class="absolute -top-10 -right-10 w-60 h-60 rounded-full bg-cyan-400/20 blur-3xl"></div>
+        <div class="absolute -bottom-10 -left-10 w-60 h-60 rounded-full bg-orange-400/20 blur-3xl"></div>
+        <div class="grid md:grid-cols-2 gap-6 items-center">
+          <div>
+            <div class="tag">Ready to move forward?</div>
+            <h3 class="text-3xl md:text-4xl font-black tracking-tight mt-2">Start your pre‑construction plan today</h3>
+            <p class="mt-3 text-slate-300">Get a rendering, estimate, and automated proposal in minutes — no heavy software required.</p>
+          </div>
+          <div class="flex md:justify-end">
+            <a href="#intake" class="btn btn-primary pulse-ring">Begin Now</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/10">
+    <div class="container-max py-10">
+      <div class="grid md:grid-cols-4 gap-6">
+        <div>
+          <div class="font-black text-lg">NovaBuild AI</div>
+          <div class="text-slate-400 mt-2 text-sm">Innovative, efficient construction planning powered by AI.</div>
+        </div>
+        <div>
+          <div class="font-semibold">Product</div>
+          <ul class="mt-2 text-slate-300 text-sm space-y-1">
+            <li><a href="#intake" class="hover:underline">Intake</a></li>
+            <li><a href="#ai" class="hover:underline">AI Tools</a></li>
+            <li><a href="#dashboard" class="hover:underline">Client Portal</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="font-semibold">Resources</div>
+          <ul class="mt-2 text-slate-300 text-sm space-y-1">
+            <li><a href="#" class="hover:underline">FAQ</a></li>
+            <li><a href="#" class="hover:underline">Docs</a></li>
+            <li><a href="#" class="hover:underline">Support</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="font-semibold">Legal</div>
+          <ul class="mt-2 text-slate-300 text-sm space-y-1">
+            <li><a href="#" class="hover:underline">Terms</a></li>
+            <li><a href="#" class="hover:underline">Privacy</a></li>
+            <li><a href="#" class="hover:underline">Cookies</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="divider my-6"></div>
+      <div class="flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-slate-400">
+        <div>© <span id="year"></span> NovaBuild AI. All rights reserved.</div>
+        <div class="flex items-center gap-4">
+          <a href="#" class="hover:underline">Status</a>
+          <a href="#" class="hover:underline">Security</a>
+          <a href="#" class="hover:underline">Contact</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 hidden">
+    <div class="glass rounded-xl px-4 py-3 flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-emerald-400/20 flex items-center justify-center">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 7l-9 9-5-5" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="text-sm">Progress saved</div>
+    </div>
+  </div>
+
+  <div id="chat" class="fixed bottom-6 right-6 w-[90vw] max-w-sm glass rounded-2xl p-4 shadow-soft">
+    <div class="flex items-center justify-between">
+      <div class="font-semibold">AI Assistant</div>
+      <button id="close-chat" class="text-slate-400 hover:text-white">✕</button>
+    </div>
+    <div class="mt-3 h-56 overflow-auto scrollbar space-y-2" id="chat-log">
+      <div class="text-xs text-slate-400">Hi! Ask about materials, cost drivers, or next steps.</div>
+    </div>
+    <div class="mt-3 flex gap-2">
+      <input id="chat-input" class="field flex-1" placeholder="Ask a question..." />
+      <button id="chat-send" class="btn btn-primary">Send</button>
+    </div>
+  </div>
+
+  <script>
+    // Utility
+    const $ = (s, o = document) => o.querySelector(s);
+    const $$ = (s, o = document) => Array.from(o.querySelectorAll(s));
+    const storageKey = "novabuild-intake-v1";
+
+    // Year
+    $("#year").textContent = new Date().getFullYear();
+
+    // Intake form logic
+    const form = $("#intake-form");
+    const steps = $$(".step");
+    let currentStep = 1;
+    const totalSteps = 4;
+
+    function showStep(n) {
+      currentStep = n;
+      steps.forEach((el, i) => {
+        el.classList.toggle("hidden", i !== n - 1);
+      });
+      $("#step-counter").textContent = `Step ${n} of ${totalSteps}`;
+      $$(".dot").forEach((d, i) => d.classList.toggle("active", i < n));
+      persistForm();
+    }
+    $("#next").addEventListener("click", () => {
+      if (currentStep < totalSteps) showStep(currentStep + 1);
+    });
+    $("#prev").addEventListener("click", () => {
+      if (currentStep > 1) showStep(currentStep - 1);
+    });
+
+    // Conditional logic: If type is Commercial, show:
+    function applyConditional() {
+      const type = $("#type").value;
+      const isCommercial = type === "Commercial";
+      // No extra fields required in UI; could extend with optional blocks if needed
+    }
+    $("#type").addEventListener("change", applyConditional);
+
+    // Auto-save progress
+    function persistForm() {
+      const data = Object.fromEntries(new FormData(form).entries());
+      data.files = [...$$("#file-list .file-item").map(f => f.dataset)].join(",");
+      localStorage.setItem(storageKey, JSON.stringify(data));
+      showToast();
+    }
+    function loadForm() {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return;
+      try {
+        const data = JSON.parse(raw);
+        $$("#intake-form input, #intake-form select, #intake-form textarea").forEach(input => {
+          if (data[input.name] !== undefined) input.value = data[input.name];
+        });
+        // Files
+        $("#dash-files").innerHTML = "";
+        if (data.files) {
+          data.files.split(",").slice(0,6).forEach(f => {
+            const a = document.createElement("a");
+            a.href = "#";
+            a.className = "pill";
+            a.textContent = f;
+            a.addEventListener("click", e => e.preventDefault());
+            $("#dash-files").appendChild(a);
+          });
+        }
+        // Dashboard summary
+        $("#dash-budget").textContent = data.budget || "—";
+        $("#dash-timeline").textContent = data.timeline || "—";
+        $("#dash-type").textContent = data.type || "—";
+        $("#clientId").textContent = (data.email || "guest")?.split("@")[0] || "guest";
+      } catch (e) {}
+    }
+    $("#save").addEventListener("click", persistForm);
+
+    // File upload handling
+    const drop = $("#drop");
+    const fileInput = $("#file-input");
+    const fileList = $("#file-list");
+    drop.addEventListener("click", () => fileInput.click());
+    drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("dragover"); });
+    drop.addEventListener("dragleave", () => drop.classList.remove("dragover"));
+    drop.addEventListener("drop", e => {
+      e.preventDefault(); drop.classList.remove("dragover");
+      handleFiles(e.dataTransfer.files);
+    });
+    fileInput.addEventListener("change", e => handleFiles(e.target.files));
+    function handleFiles(files) {
+      [...files].forEach(f => {
+        const item = document.createElement("div");
+        item.className = "file-item glass rounded-lg p-3 flex items-center justify-between";
+        item.dataset = f.name;
+        item.innerHTML = `
+          <div class="text-sm">
+            <div class="font-medium">${f.name}</div>
+            <div class="text-xs text-slate-400">${Math.round(f.size/1024)} KB</div>
+          </div>
+          <button class="btn btn-outline text-xs">Remove</button>
+        `;
+        item.querySelector("button").addEventListener("click", () => {
+          item.remove();
+          persistForm();
+        });
+        fileList.appendChild(item);
+      });
+      persistForm();
+      // Update dashboard files
+      $("#dash-files").innerHTML = fileList.innerHTML;
+    }
+
+    // AI Rendering simulation
+    $("#generate-render").addEventListener("click", () => {
+      showToast("Rendering generated");
+      $("#download-render").disabled = false;
+    });
+    $("#download-render").addEventListener("click", () => {
+      const blob = new Blob(["",""], {type: "text/plain"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "novabuild_render.txt";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    // Cost estimator
+    function calculateEstimate() {
+      const sqft = parseFloat($("#sqft").value) || 0;
+      const rooms = parseInt($("#rooms").value) || 0;
+      const finishes = $("#finishes").value;
+      const type = $("#est-type").value;
+      const laborBase = 120; // $/sqft
+      const materialFactor = 60; // $/sqft
+      const finishMult = finishes === "Standard" ? 1 : finishes === "Luxury" ? 1.35 : 1.7;
+      const typeMult = type === "Commercial" ? 1.25 : type === "Custom Build" ? 1.3 : 1.0;
+      const estimate = Math.round((sqft * (laborBase + materialFactor)) * finishMult * typeMult);
+      $("#estimate").textContent = "$" + (estimate.toLocaleString());
+      $("#add-to-proposal").disabled = false;
+      return estimate;
+    }
+    $("#calc").addEventListener("click", calculateEstimate);
+
+    // Proposal actions
+    $("#export-pdf").addEventListener("click", () => {
+      const estimate = $("#estimate").textContent.replace("$","").replace(",","");
+      const estimateNum = estimate ? parseInt(estimate) : 0;
+      showToast("Proposal PDF exported");
+      // Simple text file as demo export
+      const blob = new Blob([
+        `NovaBuild AI - Project Proposal\n\n`,
+        `Client: ${localStorage.getItem(storageKey)?.name || "—"}\n`,
+        `Budget: ${localStorage.getItem(storageKey)?.budget || "—"}\n`,
+        `Timeline: ${localStorage.getItem(storageKey)?.timeline || "—"}\n`,
+        `Type: ${localStorage.getItem(storageKey)?.type || "—"}\n`,
+        `Estimated Cost: $${estimateNum.toLocaleString()}\n`,
+        `Generated: ${new Date().toLocaleString()}\n`
+      ], {type: "text/plain"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "NovaBuild_AI_Proposal.txt";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    // Summarize scope (mock AI)
+    $("#summarize").addEventListener("click", () => {
+      const name = localStorage.getItem(storageKey)?.name || "Your";
+      const type = localStorage.getItem(storageKey)?.type || "Project";
+      const budget = localStorage.getItem(storageKey)?.budget || "your budget";
+      const goals = localStorage.getItem(storageKey)?.goals || "your goals";
+      const material = localStorage.getItem(storageKey)?.material || "preferred style";
+      const summary = `${name}, your ${type} will be scoped to ${budget} with focus on ${goals}.
+We will use a ${material} aesthetic, optimize for energy efficiency, and align with your timeline.
+AI has suggested high‑impact upgrades and material options to balance cost and performance.`;
+      $("#summary").textContent = summary;
+      showToast("Scope summary updated");
+    });
+
+    // Messages Inbox
+    $("#send-message").addEventListener("click", sendMessage);
+    $("#message-input").addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
+    function sendMessage() {
+      const input = $("#message-input");
+      const text = input.value.trim();
+      if (!text) return;
+      const bubble = document.createElement("div");
+      bubble.className = "glass rounded-lg p-3";
+      bubble.innerHTML = `<div class="text-xs text-slate-400">You</div><div class="text-sm">${text}</div>`;
+      $("#messages").appendChild(bubble);
+      input.value = "";
+      // Simulated AI reply
+      const reply = document.createElement("div");
+      reply.className = "glass rounded-lg p-3";
+      reply.innerHTML = `<div class="text-xs text-slate-400">AI</div><div class="text-sm">Thanks — we’ll update the proposal and follow up by end of day.</div>`;
+      $("#messages").appendChild(reply);
+      $("#messages").scrollTop = $("#messages").scrollHeight;
+    }
+
+    // AI Chat widget
+    const chat = $("#chat");
+    $("#close-chat").addEventListener("click", () => chat.classList.add("hidden"));
+    function addChatMessage(text, author = "AI") {
+      const div = document.createElement("div");
+      div.className = "text-sm";
+      div.innerHTML = `<span class="text-slate-400">${author}:</span> ${text}`;
+      $("#chat-log").appendChild(div);
+      $("#chat-log").scrollTop = $("#chat-log").scrollHeight;
+    }
+    ["What’s included in the estimate?", "How do AI renderings help?", "Can you send material options?"].forEach(q => {
+      addChatMessage(q, "User");
+    });
+    addChatMessage("AI assistant here — ask about costs, materials, or next steps.");
+    $("#chat-send").addEventListener("click", () => {
+      const q = $("#chat-input").value.trim();
+      if (!q) return;
+      addChatMessage(q, "User");
+      $("#chat-input").value = "";
+      setTimeout(() => {
+        addChatMessage("Based on your project type and budget, we suggest starting with standard finishes and adjusting to luxury as budget allows. Full material list available in the proposal.");
+      }, 600);
+    });
+    $("#chat-input").addEventListener("keydown", e => { if (e.key === "Enter") $("#chat-send").click(); });
+
+    // Toast
+    let toastTimer;
+    function showToast(msg = "Saved") {
+      const t = $("#toast");
+      t.querySelector("div").querySelector("div.text-sm").textContent = msg;
+      t.classList.remove("hidden");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.add("hidden"), 1800);
+    }
+
+    // Initialize
+    loadForm();
+    addChatMessage("Tip: You can upload blueprints in step 4.");
+  </script>
+</body>
+</html>
